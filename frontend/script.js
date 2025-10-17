@@ -1,9 +1,7 @@
 // Simple task manager that works without API
 let tasks = [
-    { id: 1, title: "Learn Azure - DONE! ✅" },
-    { id: 2, title: "Build CI/CD Pipeline - DONE! ✅" },
-    { id: 3, title: "Deploy to Azure - DONE! ✅" },
-    { id: 4, title: "Demo to Teacher - READY! 🎯" }
+    { id: 1, title: "Learn Azure" },
+    { id: 2, title: "Build CI/CD Pipeline" }
 ];
 
 // Load tasks when page loads
@@ -16,10 +14,15 @@ function displayTasks() {
     const taskList = document.getElementById('taskList');
     taskList.innerHTML = '';
     
+    if (tasks.length === 0) {
+        taskList.innerHTML = '<li>No tasks yet. Add one above!</li>';
+        return;
+    }
+    
     tasks.forEach(task => {
         const li = document.createElement('li');
         li.innerHTML = `
-            <span style="color: green;">${task.title}</span>
+            ${task.title}
             <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
         `;
         taskList.appendChild(li);
@@ -46,7 +49,7 @@ function addTask() {
     displayTasks();
     
     // Show success
-    alert('✅ Task added successfully!\n\nThis demonstrates the frontend is working!\n\nThe CI/CD pipeline automatically deployed this to Azure.');
+    alert('Task added successfully!');
 }
 
 function deleteTask(taskId) {
