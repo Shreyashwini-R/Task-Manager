@@ -1,46 +1,39 @@
-let tasks = [
-    { id: 1, title: "Learn Azure" },
-    { id: 2, title: "Build CI/CD Pipeline" }
-];
-
 module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+    let tasks = [
+        { id: 1, title: "Learn Azure" },
+        { id: 2, title: "Build CI/CD Pipeline" }
+    ];
 
-    // Enable CORS
     context.res = {
         headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
+            'Access-Control-Allow-Origin': '*'
         }
     };
 
-    // Handle OPTIONS for CORS preflight
-    if (req.method === "OPTIONS") {
-        context.res.status = 200;
-        return;
-    }
-
-    if (req.method === "GET") {
+    // GET - Return all tasks
+    if (req.method === 'GET') {
         context.res.body = tasks;
     }
-    else if (req.method === "POST") {
+    // POST - Add new task  
+    else if (req.method === 'POST') {
         const newTask = {
             id: tasks.length + 1,
-            title: req.body && req.body.title
+            title: req.body.title
         };
         tasks.push(newTask);
-        context.res.status = 201;
         context.res.body = newTask;
+        context.res.status = 201;
     }
-    else if (req.method === "DELETE") {
-        const taskId = parseInt(context.bindingData.id);
+    // DELETE - Remove task
+    else if (req.method === 'DELETE') {
+        const taskId = parseInt(req.params.id);
         tasks = tasks.filter(task => task.id !== taskId);
         context.res.body = { success: true };
     }
+    // Method not allowed
     else {
         context.res.status = 405;
-        context.res.body = "Method not allowed";
+        context.res.body = { error: 'Method not allowed' };
     }
 };
