@@ -1,0 +1,17 @@
+{
+  "platform": {
+    "apiRuntime": "python:3.11"
+  },
+  "routes": [
+    {
+      "route": "/api/*",
+      "methods": ["GET", "POST", "DELETE", "PUT"],
+      "allowedRoles": ["anonymous"]
+    }
+  ],
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/index.html"
+    }
+  }
+}

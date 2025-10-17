@@ -1,39 +1,59 @@
-from flask import Flask, jsonify, request, abort
-from flask_cors import CORS
+from flask import Flask, jsonify, request
 import os
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes, crucial for frontend-backend communication
 
-# In-memory "database" for initial development
+# Enable CORS for all routes
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+    return response
+
+# Simple in-memory storage
 tasks = [
     {"id": 1, "title": "Learn Azure"},
     {"id": 2, "title": "Build CI/CD Pipeline"}
 ]
 
-# Get all tasks
-@app.route('/api/tasks', methods=['GET'])
+@app.route('/api/tasks', methods=['GET', 'OPTIONS'])
 def get_tasks():
+    if request.method == 'OPTIONS':
+        return '', 200
     return jsonify(tasks)
 
-# Add a new task
-@app.route('/api/tasks', methods=['POST'])
+@app.route('/api/tasks', methods=['POST', 'OPTIONS'])
 def add_task():
-    if not request.json or not 'title' in request.json:
-        abort(400)  # Bad request
-    new_task = {
-        'id': tasks[-1]['id'] + 1 if tasks else 1,
-        'title': request.json['title']
-    }
-    tasks.append(new_task)
-    return jsonify(new_task), 201
+    if request.method == 'OPTIONS':
+        return '', 200
+        
+    try:
+        data = request.get_json()
+        if not data or not data.get('title'):
+            return jsonify({"error": "Title is required"}), 400
+            
+        new_task = {
+            "id": len(tasks) + 1,
+            "title": data['title']
+        }
+        tasks.append(new_task)
+        return jsonify(new_task), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-# Delete a task
-@app.route('/api/tasks/<int:task_id>', methods=['DELETE'])
+@app.route('/api/tasks/<int:task_id>', methods=['DELETE', 'OPTIONS'])
 def delete_task(task_id):
+    if request.method == 'OPTIONS':
+        return '', 200
+        
     global tasks
     tasks = [task for task in tasks if task['id'] != task_id]
-    return jsonify({'result': True})
+    return jsonify({"success": True})
+
+@app.route('/api/health')
+def health():
+    return jsonify({"status": "healthy", "message": "API is working!"})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=80)
